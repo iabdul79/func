@@ -4,32 +4,30 @@
 var isArray = Array.isArray;
 
 /** 
- * @function concatArray To concat two arrays and return an array
- * @param {Array} destArray The final array in to which the source array is to be concatinated
- * @param {Array} srctArray To be appened Array
- * @returns {Array} destArray is returned after concatination with srcArray
-**/
-function concatArray(destArray, srcArray) {
-  const lenght = srcArray.length;
-  const currIdx = destArray.length;
-  let index = -1;
-  while (++index < lenght) {
-    destArray[currIdx + index] = srcArray[index]
-  }
-  return destArray;
-};
-
-/** 
  * @constructor immutableList Constructor
  * @param {Array} list To be defaulted list
  * @returns {Object} with list as its propert containing immutable list 
 **/
-function immutableList (list) {
-  this.list = list ? isArray(list) ? list : [list] : [];
+function immutableList(paramList) {
+  if (isArray(paramList)) {
+    this.list = createList(paramList);
+  } else {
+    this.list = createList([]);
+  }
+
+  function createList(list) {
+    const size = list.length;
+    const result = new Array(size);
+    let index = -1;
+    while (++index < size) {
+      result[index] = list[index];
+    }
+    return result;
+  }
 };
 
 /** 
- * @method getList immutableList Constructor
+ * @method getList To get list form immutable list object
  * @returns {Array} List of immutableList instance
 **/
 immutableList.prototype.getList = function () {
@@ -49,13 +47,15 @@ immutableList.prototype.head = function () {
  * @returns {Object} a new list with all elements of the original list except the first 
 **/
 immutableList.prototype.tail = function () {
-  let result = new immutableList();
-  const length = this.list.length;
-  let index = 0;
-  while (++index < length) {
-    result.list[index - 1] = this.list[index];
+  const currList = this;
+  function recrve(index, list) {
+    if (index === 1) {
+      return list;
+    }
+    const offset = index -1;
+    return recrve(offset, list.cons(currList.list[offset]));
   }
-  return result;
+  return recrve(this.list.length, new immutableList());
 };
 
 /** @method cons To prepend a passed element and obtain new list
@@ -64,10 +64,22 @@ immutableList.prototype.tail = function () {
 **/
 immutableList.prototype.cons = function (element) {
   let result = new immutableList();
-  result.list[0] = element;
-  if (this.head()) {
-    result.list = concatArray(result.list, this.list);
+  const length = this.list.length;
+  let index = -1;
+  while (++index < length) {
+    result.list[index + 1] = this.list[index];
   }
+  result.list[0] = element;
+  return result;
+};
+
+/** @method cons To appened a passed element and obtain new list
+ * @param {Any} element Any element to appened it to the list
+ * @returns {Object} a new list with all elements along with the new appeneded element 
+**/
+immutableList.prototype.pros = function (element) {
+  let result = new immutableList(this.list);
+  result.list[result.list.length] = element;
   return result;
 };
 
@@ -86,16 +98,16 @@ immutableList.prototype.drop = function (toRemove) {
 **/
 immutableList.prototype.reverse = function () {
   if (this.list.length > 2) {
-    return new immutableList(concatArray(this.tail().reverse().list, [this.head()]));
+    return this.tail().reverse().pros(this.head());
   }
-  return new immutableList(concatArray(this.tail().list, [this.head()]));
+  return this.tail().pros(this.head());
 }
 
 
 /** Use new key word followed by immutableList constructor to create a new instance 
- * @constructor
+ * C O N S T R U C T O R
  * var list = new immutableList();
- * @method
+ * M E T H O D S
  * list.head() => To obtain head of list
  * list.tail() => To obtain new list of original list tail
  * list.cons('element') => To obtain new list with element prepended
