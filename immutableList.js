@@ -52,7 +52,7 @@ immutableList.prototype.tail = function () {
     if (index === 1) {
       return list;
     }
-    const offset = index -1;
+    const offset = index - 1;
     return recrve(offset, list.cons(currList.list[offset]));
   }
   return recrve(this.list.length, new immutableList());
