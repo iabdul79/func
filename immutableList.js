@@ -89,7 +89,13 @@ immutableList.prototype.pros = function (element) {
  * @returns {Object} a new list after removing first n elements from the list 
 **/
 immutableList.prototype.drop = function (toRemove) {
-  return toRemove <= 0 ? new immutableList(this.list) : this.tail().drop(--toRemove);
+  const length = this.list.length;
+  if (length > toRemove && toRemove > 0) {
+    return this.tail().drop(--toRemove);
+  } else if (toRemove < 0) {
+    return this.reverse().drop(-toRemove).reverse();
+  }
+  return new immutableList(this.list);
 };
 
 /** 
